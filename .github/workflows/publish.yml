@@ -1,0 +1,68 @@
+name: Publish
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Publish however much changed (after reading the diff)
+        type: boolean
+        default: false
+
+# Each step gets only what it needs: the signing key in one, the token to write in another.
+permissions: {}
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - name: Tools from the distribution
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq minisign python3-cryptography
+
+      - name: Test
+        run: /usr/bin/python3 -I test_build.py
+
+      - name: Build and check
+        env:
+          FORCE: ${{ inputs.force }}
+        run: |
+          if [ "$FORCE" = "true" ]; then /usr/bin/python3 -I build.py --force; else /usr/bin/python3 -I build.py; fi
+          mkdir out
+          cp data/support.json out/support.json
+
+      - name: Sign
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+        run: /usr/bin/python3 -I sign.py out/support.json out/support.json.minisig
+
+      - name: Check the signature as the app will
+        run: minisign -Vm out/support.json -x out/support.json.minisig -P "$(cat public-key.txt)"
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          as_of=$(/usr/bin/python3 -I -c 'import json; print(json.load(open("data/support.json"))["as_of"])')
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/support.json
+          if ! git diff --cached --quiet; then
+            git commit -q -m "Data as of $as_of"
+            git push -q "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
+          fi
+          gh release create "data-$as_of-$GITHUB_RUN_NUMBER" out/support.json out/support.json.minisig \
+            --latest --title "Data as of $as_of" --notes "Support data from endoflife.date as of $as_of."
+          # The history is in git; a month of releases is enough to go back to.
+          gh release list --limit 200 --json tagName --jq '.[30:] | .[].tagName' |
+            while read -r tag; do gh release delete "$tag" --yes --cleanup-tag; done
