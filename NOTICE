@@ -1,3 +1,11 @@
+data/advisories.json is derived, selected and shortened by product, from:
+
+- Bitnami Vulnerability Database (https://github.com/bitnami/vulndb), through OSV (https://osv.dev), Apache License 2.0.
+- GitHub Advisory Database (https://github.com/github/advisory-database), through OSV, CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
+- Go Vulnerability Database (https://pkg.go.dev/vuln), through OSV.
+- NIST National Vulnerability Database (https://nvd.nist.gov). This product uses data from the NVD but is not endorsed or certified by the NVD.
+- CISA Known Exploited Vulnerabilities Catalog (https://www.cisa.gov/known-exploited-vulnerabilities-catalog).
+
 data/support.json is derived from endoflife.date (https://endoflife.date).
 
 Copyright 2020 endoflife.date contributors
