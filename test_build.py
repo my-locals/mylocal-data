@@ -52,6 +52,10 @@ class Normalize(unittest.TestCase):
         self.assertEqual(d["scoped"]["docker:postgres"], "postgresql")
         self.assertEqual(d["scoped"]["docker:valkey/valkey"], "valkey")
 
+    def test_python_packages_go_by_their_dist_info_folders(self):
+        d = self.data(product("apache-airflow", identifiers=[{"type": "purl", "id": "pkg:pypi/apache-airflow"}]))
+        self.assertEqual(d["scoped"]["pypi:apache_airflow"], "apache-airflow")
+
     def test_numbering_of_its_own_is_not_compared(self):
         rel = [{"name": "27", "isEol": False, "latest": {"name": "27.28.101"}}]
         self.assertNotIn("l", self.data(product("azul-zulu", rel))["products"]["azul-zulu"][0])

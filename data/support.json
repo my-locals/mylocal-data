@@ -928,7 +928,7 @@
   "nuget:jQuery":"jquery",
   "nuget:jQuery.UI.Combined":"jquery-ui",
   "pypi:ansible":"ansible",
-  "pypi:apache-airflow":"apache-airflow",
+  "pypi:apache_airflow":"apache-airflow",
   "pypi:django":"django",
   "pypi:numpy":"numpy",
   "pypi:wagtail":"wagtail"

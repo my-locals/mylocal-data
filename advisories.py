@@ -5,9 +5,11 @@ version of, with their whole text, for the app to compare on the Mac.
 Where each comes from, by how much it can be trusted to be complete (measured against
 Node.js's own list: Bitnami matched it, NVD had one advisory in ten on recent versions):
 
-  covered   OSV's Bitnami, Maven (GitHub Advisory Database) and Go data: no match can read as
-            "no known advisories"
-  partial   NVD, for products those do not have: a match is real, no match says nothing
+  covered   OSV's data where it has been enough: no match can read as "no known advisories"
+  partial   NVD and the rest of OSV's data: a match is real, no match says nothing
+
+A product goes in a covered table only once it has been checked against its own list of
+advisories, or belongs with those that have.
 
 The file is only ever shown. A run that would change much more than a normal day stops, and
 the last good file stays published.
@@ -55,7 +57,6 @@ BITNAMI = {
     "keycloak": "keycloak",
     "mariadb": "mariadb",
     "memcached": "memcached",
-    "minio": "minio",
     "mongodb": "mongodb",
     "nginx": "nginx",
     "node": "nodejs",
@@ -87,7 +88,9 @@ MAVEN = {
     "org.springframework.security:spring-security-web": "spring-security",
     "org.springframework.security:spring-security-config": "spring-security",
     "org.apache.tomcat.embed:tomcat-embed-core": "tomcat",
+    "org.apache.tomcat:tomcat": "tomcat",
     "org.apache.tomcat:tomcat-catalina": "tomcat",
+    "org.apache.tomcat:tomcat-coyote": "tomcat",
     "org.eclipse.jetty:jetty-server": "eclipse-jetty",
     "org.eclipse.jetty:jetty-http": "eclipse-jetty",
     "io.netty:netty-common": "netty",
@@ -105,6 +108,144 @@ MAVEN = {
 
 # Go's own toolchain and standard library, what `go 1.27.2` in a binary means.
 GO = {"stdlib": "go", "toolchain": "go"}
+
+# npm's servers whose own lists were compared on 2026-10-31: all of vite's 23 and Next.js's 72
+# are in OSV. A value is `ecosystem:name`, what the app looks up for a package, and turns into
+# the product when the support data knows one (`resolved`).
+NPM = {"vite": "npm:vite", "next": "npm:next"}
+
+# What else these sources know, for the partial view. Compared the same way, astro's and
+# nuxt's lists had advisories OSV does not, so nothing here can read as complete. Only what
+# runs as a server: adding every package would not fit, and a project's dependencies are what
+# `pnpm audit` is for. Left out: MinIO's Go module, whose date-numbered releases do not compare
+# with the 0.0.0 ranges it has.
+BITNAMI_ALSO = {
+    "airflow": "apache-airflow",
+    "discourse": "discourse",
+    "django": "django",
+    "drupal": "drupal",
+    "gitea": "golang:code.gitea.io/gitea",
+    "gitlab": "gitlab",
+    "jenkins": "jenkins",
+    "joomla": "joomla",
+    "kibana": "kibana",
+    "magento": "magento",
+    "mattermost": "mattermost",
+    "mediawiki": "mediawiki",
+    "moodle": "moodle",
+    "phpmyadmin": "phpmyadmin",
+    "prometheus": "prometheus",
+    "rails": "rails",
+    "solr": "solr",
+    "vault": "hashicorp-vault",
+    "wordpress": "wordpress",
+    "zookeeper": "zookeeper",
+}
+GO_ALSO = {
+    "code.gitea.io/gitea": "golang:code.gitea.io/gitea",
+    "github.com/argoproj/argo-cd": "argo-cd",
+    "github.com/argoproj/argo-cd/v2": "argo-cd",
+    "github.com/caddyserver/caddy/v2": "caddy",
+    "github.com/cilium/cilium": "cilium",
+    "github.com/containerd/containerd": "containerd",
+    "github.com/docker/docker": "docker-engine",
+    "github.com/grafana/grafana": "grafana",
+    "github.com/hashicorp/consul": "consul",
+    "github.com/hashicorp/nomad": "nomad",
+    "github.com/hashicorp/vault": "hashicorp-vault",
+    "github.com/kyverno/kyverno": "kyverno",
+    "github.com/nats-io/nats-server/v2": "golang:github.com/nats-io/nats-server/v2",
+    "github.com/ollama/ollama": "golang:github.com/ollama/ollama",
+    "github.com/openbao/openbao": "openbao",
+    "github.com/prometheus/prometheus": "prometheus",
+    "github.com/rancher/rancher": "rancher",
+    "github.com/traefik/traefik": "traefik",
+    "github.com/traefik/traefik/v2": "traefik",
+    "github.com/traefik/traefik/v3": "traefik",
+    "k8s.io/kubernetes": "kubernetes",
+}
+NPM_ALSO = {name: f"npm:{name}" for name in (
+    "@strapi/strapi",
+    "astro",
+    "directus",
+    "electron",
+    "flowise",
+    "gatsby",
+    "n8n",
+    "nocodb",
+    "nuxt",
+    "parse-server",
+    "pm2",
+    "serve",
+    "storybook",
+    "verdaccio",
+    "webpack-dev-server",
+    "wrangler",
+)}
+# As the app reads them from `*.dist-info` folders, which have `_` for `-`.
+PYPI = {name: "pypi:" + name.replace("-", "_") for name in (
+    "ansible",
+    "apache-airflow",
+    "celery",
+    "daphne",
+    "django",
+    "fastapi",
+    "flask",
+    "gradio",
+    "gunicorn",
+    "jupyter-server",
+    "jupyterlab",
+    "litellm",
+    "mkdocs",
+    "mlflow",
+    "notebook",
+    "open-webui",
+    "sanic",
+    "streamlit",
+    "tornado",
+    "uvicorn",
+    "wagtail",
+    "waitress",
+)}
+# Rails has its advisories in the gems it is made of, all numbered as it is.
+RUBYGEMS = {
+    "actionmailer": "gem:rails",
+    "actionpack": "gem:rails",
+    "actionview": "gem:rails",
+    "activerecord": "gem:rails",
+    "activestorage": "gem:rails",
+    "activesupport": "gem:rails",
+    "jekyll": "gem:jekyll",
+    "passenger": "gem:passenger",
+    "puma": "gem:puma",
+    "rails": "gem:rails",
+    "railties": "gem:rails",
+    "sidekiq": "gem:sidekiq",
+}
+PACKAGIST = {
+    "craftcms/cms": "craft-cms",
+    "drupal/core": "drupal",
+    "laravel/framework": "laravel",
+    "mautic/core": "mautic",
+    "moodle/moodle": "moodle",
+    "phpmyadmin/phpmyadmin": "phpmyadmin",
+    "shopware/core": "shopware",
+    "statamic/cms": "statamic",
+    "symfony/symfony": "symfony",
+    "typo3/cms-core": "typo3",
+}
+
+# OSV's name for each set of data, what it is called in the file, and its tables: covered,
+# then partial.
+OSV_DATA = (
+    ("Bitnami", "bitnami", BITNAMI, BITNAMI_ALSO),
+    ("Maven", "ghsa", MAVEN, {}),
+    ("Go", "go", GO, GO_ALSO),
+    ("npm", "ghsa", NPM, NPM_ALSO),
+    ("PyPI", "pypi", {}, PYPI),
+    ("RubyGems", "ghsa", {}, RUBYGEMS),
+    ("Packagist", "ghsa", {}, PACKAGIST),
+)
 
 # What a package's data has wrongly, by (product, advisory). Measured: nginx 1.31.8 matched
 # this one, which is about NGINX Unit.
@@ -130,9 +271,12 @@ NVD_NOT = {
 }
 
 SEVERITIES = {"low", "medium", "high", "critical"}
+# GitHub's word for medium.
+SEVERITY_NAMES = {"moderate": "medium"}
 TEXT_LIMIT = 20_000
 TITLE_LIMIT = 300
-FETCH_LIMIT = 256 << 20
+# npm's data is 220 MB, nearly all of it reports of malicious packages.
+FETCH_LIMIT = 512 << 20
 FILE_LIMIT = 32 << 20
 FEWEST = 1_000
 MAX_LOST = 0.05
@@ -157,11 +301,21 @@ def clean_text(text, limit=TEXT_LIMIT):
 
 def severity_of(value):
     value = value.lower() if isinstance(value, str) else None
+    value = SEVERITY_NAMES.get(value, value)
     return value if value in SEVERITIES else None
 
 
+def resolved(table, scoped):
+    """`table` with each `ecosystem:name` the support data has a product for as that product:
+    the key the app will look for. The support data can gain one any day."""
+    return {name: scoped.get(value, value) for name, value in table.items()}
+
+
 def ranges_of_osv(affected):
-    """OSV's events as ranges: `i` from (inclusive), `f` fixed in, `l` last affected."""
+    """OSV's events as ranges: `i` from (inclusive), `f` fixed in, `l` last affected. Only those
+    that place a version: as with NVD, a start and no end says nothing about any one version,
+    and it is mostly a program that does not release as a Go module, or a source that stopped
+    looking (Grafana's from 2018, GitLab's from 2025, both long fixed). `0.0.0-` is a commit."""
     ranges = []
     for r in affected.get("ranges") or []:
         if r.get("type") not in ("SEMVER", "ECOSYSTEM"):
@@ -182,7 +336,10 @@ def ranges_of_osv(affected):
                 current = None
         if current is not None:
             ranges.append(current)
-    return [r for r in ranges if all(VERSION.fullmatch(v) for v in r.values())]
+    return [
+        r for r in ranges
+        if ("f" in r or "l" in r) and all(VERSION.fullmatch(v) and not v.startswith("0.0.0-") for v in r.values())
+    ]
 
 
 def ranges_of_nvd(match):
@@ -205,11 +362,25 @@ class Merged:
 
     def __init__(self):
         self.items = {}
+        self.names = {}
+
+    def key_of(self, advisory_id, aliases):
+        """Its CVE, or the name a record of the same advisory went by: an advisory without a
+        CVE can have a record from GitHub and another from Go or PyPI, naming each other."""
+        names = [a for a in [advisory_id, *aliases] if isinstance(a, str)]
+        cve = next((a for a in names if CVE.fullmatch(a)), None)
+        seen = next((self.names[a] for a in names if a in self.names), None)
+        key = cve or seen or advisory_id
+        if seen and seen != key and not CVE.fullmatch(seen) and key not in self.items:
+            self.items[key] = {**self.items.pop(seen), "id": key}
+            self.names = {a: key if k == seen else k for a, k in self.names.items()}
+        self.names.update(dict.fromkeys(names, key))
+        return key
 
     def add(self, advisory_id, aliases, product, ranges, severity, title, text, published, source):
         if (product, advisory_id) in WRONG or not ranges or not ID.fullmatch(advisory_id):
             return
-        cve = next((a for a in [advisory_id, *aliases] if isinstance(a, str) and CVE.fullmatch(a)), advisory_id)
+        cve = self.key_of(advisory_id, aliases)
         if (product, cve) in WRONG:
             return
         item = self.items.setdefault(cve, {"id": cve, "products": {}, "sources": set()})
@@ -230,13 +401,16 @@ class Merged:
 def osv_records(name):
     with zipfile.ZipFile(io.BytesIO(fetch(OSV.format(name)))) as z:
         for member in z.infolist():
+            if member.filename.startswith("MAL-"):
+                continue
             if member.filename.endswith(".json") and member.file_size < 8 << 20:
                 yield json.loads(z.read(member))
 
 
 def add_osv(merged, name, table, source):
     for record in osv_records(name):
-        if record.get("withdrawn"):
+        # Bitnami's own Helm charts are under the names of what they install, with their numbers.
+        if record.get("withdrawn") or "helm chart" in str(record.get("details")).lower():
             continue
         for affected in record.get("affected") or []:
             product = table.get((affected.get("package") or {}).get("name"))
@@ -268,9 +442,11 @@ def nvd_severity(metrics):
     return None
 
 
-def add_nvd(merged, cpes, covered, year_to):
-    """NVD's advisories of `cpes` the others do not cover, and severities for those that came
-    without one (Go's)."""
+def add_nvd(merged, cpes, year_to):
+    """NVD's advisories of `cpes`, and severities for those that came without one (Go's). Where
+    a source above has this advisory for a product its ranges stand: they come from the package,
+    NVD's from a product name. Where none has, NVD's are added even to a covered product, whose
+    sources can be missing old versions: 49 of Quarkus's, 75 of Keycloak's."""
     for year in range(NVD_FIRST_YEAR, year_to + 1):
         feed = json.loads(gzip.decompress(fetch(NVD.format(year))))
         for wrapped in feed["vulnerabilities"]:
@@ -279,6 +455,7 @@ def add_nvd(merged, cpes, covered, year_to):
                 continue
             severity = nvd_severity(cve.get("metrics") or {})
             known = merged.items.get(cve["id"])
+            placed = set(known["products"]) if known is not None else set()
             if known is not None and severity and "severity" not in known:
                 known["severity"] = severity
             text = next((d["value"] for d in cve.get("descriptions") or [] if d.get("lang") == "en"), "")
@@ -289,7 +466,7 @@ def add_nvd(merged, cpes, covered, year_to):
                             continue
                         parts = match["criteria"].split(":")
                         product = cpes.get((parts[3], parts[4]))
-                        if not product or product in covered:
+                        if not product or product in placed:
                             continue
                         found = ranges_of_nvd(match)
                         if found:
@@ -311,6 +488,8 @@ def cpes_of(products):
 
 
 def finish(merged, exploited, today, covered):
+    """A covered product with no advisory at all is not covered: its source has lost it, or
+    never had it, and no match would read as none known."""
     advisories = []
     for cve in sorted(merged.items):
         item = merged.items[cve]
@@ -327,8 +506,8 @@ def finish(merged, exploited, today, covered):
     return {
         "schema": SCHEMA,
         "as_of": today,
-        "sources": "OSV (Bitnami vulndb, GitHub Advisory Database, Go), NVD, CISA KEV",
-        "products": {p: ("covered" if p in covered else "partial") for p in sorted(products | covered)},
+        "sources": "OSV (Bitnami vulndb, GitHub Advisory Database, Go, PyPI), NVD, CISA KEV",
+        "products": {p: ("covered" if p in covered and p in products else "partial") for p in sorted(products | covered)},
         "advisories": advisories,
     }
 
@@ -383,12 +562,14 @@ def main():
     today = now.date().isoformat()
     try:
         merged = Merged()
-        add_osv(merged, "Bitnami", BITNAMI, "bitnami")
-        add_osv(merged, "Maven", MAVEN, "ghsa")
-        add_osv(merged, "Go", GO, "go")
-        covered = {*BITNAMI.values(), *MAVEN.values(), *GO.values()}
+        scoped = json.loads(SUPPORT.read_text(encoding="utf-8"))["scoped"]
+        covered = set()
+        for name, source, complete, also in OSV_DATA:
+            complete = resolved(complete, scoped)
+            covered.update(complete.values())
+            add_osv(merged, name, {**resolved(also, scoped), **complete}, source)
         products = json.loads(fetch(EOL))["result"]
-        add_nvd(merged, cpes_of(products), covered, now.year)
+        add_nvd(merged, cpes_of(products), now.year)
         exploited = {v["cveID"] for v in json.loads(fetch(KEV))["vulnerabilities"]}
         new = finish(merged, exploited, today, covered)
         check(new)

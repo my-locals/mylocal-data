@@ -4,8 +4,8 @@
 
 - **자료:** [`data/support.json`](data/support.json). [endoflife.date](https://endoflife.date)(MIT, [`NOTICE`](NOTICE))에서 만든 제품별 릴리스 라인, 지원 종료일, 최신 패치입니다. 제품 하나가 한 줄이라 `git log -p`로 무엇이 바뀌었는지 읽을 수 있습니다.
 - **보안 공지:** [`data/advisories.json`](data/advisories.json). 제품별로 알려진 공지와 설명 전문입니다. 공지 하나가 한 줄입니다.
-  - `covered` 제품: OSV의 Bitnami, Maven(GitHub Advisory Database), Go 자료. 공지가 없으면 "알려진 공지 없음"으로 표시합니다.
-  - `partial` 제품: 위 자료에 없어 NVD로 보는 제품. NVD는 CPE가 없는 CVE가 많아(2026년 56%) 공지가 없어도 "없음"이라고 하지 않습니다.
+  - `covered` 제품: OSV의 Bitnami, Maven(GitHub Advisory Database), Go 자료와 npm의 vite, Next.js. 공지가 없으면 "알려진 공지 없음"으로 표시합니다. 이 자료에 없는 공지는 NVD에서 더합니다.
+  - `partial` 제품: NVD와 OSV의 나머지 자료(npm, PyPI, RubyGems, Packagist, Go 모듈)로 보는 제품. 공식 목록과 비교해 빠진 것이 있거나 비교하지 않았으므로, 공지가 없어도 "없음"이라고 하지 않습니다. NVD는 CPE가 없는 CVE가 많습니다(2026년 56%).
   - 실제 악용 여부는 CISA KEV에서 가져옵니다.
 - **받는 곳:** `releases/latest/download/`의 `support.json`, `advisories.json.gz`와 각각의 `.minisig`. 공지는 압축 파일 그대로 서명하므로, 앱은 압축을 풀기 전에 서명부터 확인합니다.
 - **서명:** minisign 형식입니다. 공개 키는 [`public-key.txt`](public-key.txt)이고 앱에 들어 있습니다. 비밀 키는 Actions 비밀값 `SIGNING_KEY`에만 있고, 앱 업데이트 키와 다릅니다.
@@ -21,7 +21,7 @@
 
 `.github/workflows/publish.yml`이 매일 실행합니다. 외부 액션은 커밋으로 고정한 `actions/checkout`뿐이고, 비밀 키는 서명 단계에만, 쓰기 토큰은 게시 단계에만 들어갑니다.
 
-공지 쪽만 실패하면(출처 장애나 큰 변화) 지원 정보는 그대로 게시하고 지난 공지를 유지한 뒤, 실행을 실패로 끝내 알립니다. 변화가 많아 멈췄다면 `git diff`로 내용을 확인한 뒤, 정상이면 Actions에서 `force`를 켜고 다시 실행합니다.
+공지 쪽만 실패하면(출처 장애나 큰 변화) 지원 정보는 그대로 게시하고 지난 공지를 유지한 뒤, 실행을 실패로 끝내 알립니다. 거부된 실행은 파일을 쓰지 않으므로, 변화가 많아 멈췄다면 로컬에서 `--force`로 실행해 `git diff`로 내용을 확인한 뒤, 정상이면 Actions에서 `force`를 켜고 다시 실행합니다.
 
 ```bash
 ./test_build.py && ./test_advisories.py    # 네트워크 없이 검사

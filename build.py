@@ -149,6 +149,9 @@ def normalize(products, today):
             elif ecosystem in SCOPED:
                 if ecosystem == "docker" and namespace == "library":
                     namespace = None
+                # As the app reads it from `*.dist-info` folders, which have `_` for `-`.
+                if ecosystem == "pypi":
+                    name = name.replace("-", "_")
                 key = f"{ecosystem}:{namespace}/{name}" if namespace else f"{ecosystem}:{name}"
                 if NAME.fullmatch(key):
                     scoped.setdefault(key, slug)
