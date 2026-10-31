@@ -72,21 +72,16 @@ BITNAMI = {
 }
 
 # The frameworks the app tells apart in a jar (core `FRAMEWORKS`), by the artifacts that hold
-# their advisories.
+# their advisories. `group:*` is every artifact of a group: Spring's are numbered as the whole
+# is, so an advisory about any of them goes by the version the app reads from another, and a
+# module added later needs nothing here. Only for a group numbered that way: Spring Cloud's
+# 2025.1 and Spring Data's own numbers are in groups of their own, and stay out. The
+# authorization server joined Spring Security in 7.0; its own 1.x ranges reach no version of
+# Spring Security anyone runs.
 MAVEN = {
-    "org.springframework.boot:spring-boot": "spring-boot",
-    "org.springframework.boot:spring-boot-autoconfigure": "spring-boot",
-    "org.springframework.boot:spring-boot-actuator": "spring-boot",
-    "org.springframework.boot:spring-boot-actuator-autoconfigure": "spring-boot",
-    "org.springframework:spring-core": "spring-framework",
-    "org.springframework:spring-beans": "spring-framework",
-    "org.springframework:spring-context": "spring-framework",
-    "org.springframework:spring-web": "spring-framework",
-    "org.springframework:spring-webmvc": "spring-framework",
-    "org.springframework:spring-webflux": "spring-framework",
-    "org.springframework.security:spring-security-core": "spring-security",
-    "org.springframework.security:spring-security-web": "spring-security",
-    "org.springframework.security:spring-security-config": "spring-security",
+    "org.springframework.boot:*": "spring-boot",
+    "org.springframework:*": "spring-framework",
+    "org.springframework.security:*": "spring-security",
     "org.apache.tomcat.embed:tomcat-embed-core": "tomcat",
     "org.apache.tomcat:tomcat": "tomcat",
     "org.apache.tomcat:tomcat-catalina": "tomcat",
@@ -305,6 +300,13 @@ def severity_of(value):
     return value if value in SEVERITIES else None
 
 
+def product_in(table, package):
+    """The product of a package in a table: by its name, or by its group (`group:*`)."""
+    if not isinstance(package, str):
+        return None
+    return table.get(package) or table.get(f"{package.split(':')[0]}:*")
+
+
 def resolved(table, scoped):
     """`table` with each `ecosystem:name` the support data has a product for as that product:
     the key the app will look for. The support data can gain one any day."""
@@ -413,7 +415,7 @@ def add_osv(merged, name, table, source):
         if record.get("withdrawn") or "helm chart" in str(record.get("details")).lower():
             continue
         for affected in record.get("affected") or []:
-            product = table.get((affected.get("package") or {}).get("name"))
+            product = product_in(table, (affected.get("package") or {}).get("name"))
             if product:
                 add_one(merged, record, affected, product, source)
 

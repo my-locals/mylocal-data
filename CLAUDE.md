@@ -41,7 +41,7 @@ MyLocal Mac 앱이 서버 버전의 지원 여부와 알려진 보안 공지를 
 
 **`advisories.py`의 커버리지.** `BITNAMI`, `MAVEN`, `GO`, `NPM` 표에 있는 제품은 `covered`로, 일치하는 공지가 없으면 "알려진 공지 없음"으로 표시할 수 있습니다. 그래서 표에 넣기 전에 제품의 공식 공지 목록과 대조합니다. `*_ALSO`, `PYPI`, `RUBYGEMS`, `PACKAGIST` 표와 NVD는 `partial`로, 일치하는 공지가 없어도 아무것도 말해 주지 않습니다. covered 표의 제품도 공지가 하나도 없으면 `finish()`가 partial로 내리고, 그러면 `refuse_large_changes`가 실행을 멈춥니다.
 
-**제품 키.** 지원 자료에 제품이 있으면 그 이름(`nextjs`), 없으면 앱이 찾는 패키지 이름(`npm:vite`)입니다. 표에는 `npm:next`처럼 패키지 이름으로 적어 두면 `resolved()`가 `data/support.json`의 `scoped`로 바꿉니다. 앱은 `mylocal-core`의 `advisory_key`로 같은 키를 찾습니다. PyPI 이름은 `*.dist-info` 폴더 그대로 `_`를 씁니다.
+**제품 키.** 지원 자료에 제품이 있으면 그 이름(`nextjs`), 없으면 앱이 찾는 패키지 이름(`npm:vite`)입니다. 표에는 `npm:next`처럼 패키지 이름으로 적어 두면 `resolved()`가 `data/support.json`의 `scoped`로 바꿉니다. 앱은 `mylocal-core`의 `advisory_key`로 같은 키를 찾습니다. PyPI 이름은 `*.dist-info` 폴더 그대로 `_`를 씁니다. 표의 `group:*`는 그룹의 모든 패키지를 뜻하며, 모듈이 제품과 같은 번호를 쓰는 그룹에만 씁니다.
 
 **`advisories.py`의 병합.** `Merged`는 레코드를 CVE로 합치고, CVE가 없으면 서로의 별칭으로 합칩니다. 심각도, 제목, 게시일은 먼저 들어온 값을 쓰고 본문은 가장 긴 값을 쓰므로, `OSV_DATA` 순서와 NVD를 마지막에 넣는 순서가 결과에 영향을 줍니다. NVD는 OSV에 없는 공지만 더하고, OSV에 있는 공지는 범위를 그대로 두고 빠진 심각도만 채웁니다.
 

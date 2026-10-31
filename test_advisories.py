@@ -95,6 +95,21 @@ class Merging(unittest.TestCase):
         self.assertEqual(adv.severity_of("HIGH"), "high")
         self.assertIsNone(adv.severity_of("UNKNOWN"))
 
+    def test_a_spring_module_goes_by_its_group(self):
+        find = lambda package: adv.product_in(adv.MAVEN, package)
+        self.assertEqual(find("org.springframework:spring-expression"), "spring-framework")
+        self.assertEqual(find("org.springframework:spring-not-yet-written"), "spring-framework")
+        self.assertEqual(find("org.springframework.boot:spring-boot-loader"), "spring-boot")
+        self.assertEqual(find("org.springframework.security:spring-security-crypto"), "spring-security")
+        # Numbered their own way.
+        self.assertIsNone(find("org.springframework.cloud:spring-cloud-gateway"))
+        self.assertIsNone(find("org.springframework.data:spring-data-jpa"))
+        self.assertIsNone(find("org.springframework.security.oauth:spring-security-oauth2"))
+        # The rest still go by name.
+        self.assertEqual(find("io.netty:netty-common"), "netty")
+        self.assertIsNone(find("io.netty:netty-transport"))
+        self.assertIsNone(find(None))
+
     def test_a_package_goes_by_its_product_when_there_is_one(self):
         table = {"next": "npm:next", "vite": "npm:vite", "airflow": "apache-airflow"}
         self.assertEqual(
