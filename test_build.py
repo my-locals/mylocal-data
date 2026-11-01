@@ -72,6 +72,26 @@ class Normalize(unittest.TestCase):
         self.assertEqual(lines[1], {"c": "9", "n": page, "x": True})
         self.assertNotIn("n", lines[2])
 
+    def test_a_release_on_github_goes_by_its_repository(self):
+        def page_of(link):
+            rel = [{"name": "25", "isEol": False, "latest": {"link": link}}]
+            return self.data(product("x", rel))["products"]["x"][0]["n"]
+
+        repository = "https://github.com/corretto/corretto-25"
+        for link in (
+            repository + "/releases/tag/25.0.5.0.10",
+            repository + "/releases/25.0.5.0.10",
+            repository + "/releases",
+        ):
+            self.assertEqual(page_of(link), repository)
+        # Other pages say what the repository's front page does not.
+        for link in (
+            "https://github.com/nodejs/node/blob/main/doc/changelogs/CHANGELOG_V26.md#26.13.0",
+            "https://github.com/gorilla#gorilla-toolkit",
+            "https://example.com/a/b/releases/tag/1.0",
+        ):
+            self.assertEqual(page_of(link), link)
+
     def test_java_8_numbers(self):
         self.assertEqual(build.latest_of("8u504-b01"), "8.0.504")
         self.assertEqual(build.latest_of("27.0.1.0.2+1"), "27.0.1.0.2")

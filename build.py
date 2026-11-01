@@ -85,6 +85,8 @@ DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 NAME = re.compile(r"[A-Za-z0-9@][A-Za-z0-9@._+:/-]{0,127}")
 # What a release's page may be. No user, port or `http`: the app goes by the exact host.
 PAGE = re.compile(r"https://[A-Za-z0-9.-]{1,253}(?:[/?#][A-Za-z0-9._~/%+#?=&:;,@!$()-]{0,255})?")
+# A release on GitHub goes by its repository, whose front page stays and shows the latest.
+GITHUB_RELEASE = re.compile(r"(https://github\.com/[^/?#]+/[^/?#]+)/releases(?:[/?#].*)?")
 
 
 class Refused(Exception):
@@ -116,7 +118,8 @@ def line_of(product, release):
         line["e"] = eol
     page = (release.get("latest") or {}).get("link")
     if isinstance(page, str) and PAGE.fullmatch(page):
-        line["n"] = page
+        github = GITHUB_RELEASE.fullmatch(page)
+        line["n"] = github[1] if github else page
     if release.get("isEol"):
         line["x"] = True
     else:
