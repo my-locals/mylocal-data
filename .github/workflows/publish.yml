@@ -1,7 +1,7 @@
 name: Publish
 on:
   schedule:
-    - cron: "17 3 * * *"
+    - cron: "17 3,9,15,21 * * *"
   workflow_dispatch:
     inputs:
       force:
@@ -82,11 +82,21 @@ jobs:
             git commit -q -m "Data as of $as_of"
             git push -q "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
           fi
-          gh release create "data-$as_of-$GITHUB_RUN_NUMBER" out/support.json out/support.json.minisig \
-            out/advisories.json.gz out/advisories.json.gz.minisig \
-            --latest --title "Data as of $as_of" --notes "Support data from endoflife.date as of $as_of."
+          # The app downloads when the latest release moves, so a run that found nothing new
+          # leaves it alone. Compared with what is released, not with git: a run whose release
+          # failed after its commit is made up for here.
+          mkdir last
+          if gh release download --pattern support.json --pattern advisories.json.gz --dir last \
+            && cmp -s out/support.json last/support.json \
+            && cmp -s out/advisories.json.gz last/advisories.json.gz; then
+            echo "Nothing new to publish."
+          else
+            gh release create "data-$as_of-$GITHUB_RUN_NUMBER" out/support.json out/support.json.minisig \
+              out/advisories.json.gz out/advisories.json.gz.minisig \
+              --latest --title "Data as of $as_of" --notes "Support data from endoflife.date as of $as_of."
+          fi
           # The history is in git; a month of releases is enough to go back to.
-          gh release list --limit 200 --json tagName --jq '.[30:] | .[].tagName' |
+          gh release list --limit 200 --json tagName --jq '.[120:] | .[].tagName' |
             while read -r tag; do gh release delete "$tag" --yes --cleanup-tag; done
 
       - name: Say if the advisories could not be refreshed
