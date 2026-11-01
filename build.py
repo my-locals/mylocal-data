@@ -4,7 +4,8 @@ still supported.
 
 The file is only ever shown: no decision in the app reads it. So the worst a bad file can do
 is say something false, and that is what the checks here are for: a run that would change
-much more than a normal day does stops, and leaves the last good file published.
+much more than a normal day does stops, and leaves the last good file published. Its links
+open only when someone clicks them, and only on hosts the app itself lists.
 
   ./build.py            fetch, check against data/support.json, write it
   ./build.py --force    the same, past the checks on how much changed (for a person)
@@ -82,6 +83,8 @@ NUMBERS = re.compile(r"\d+(?:\.\d+)*")
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 # What a name may be. They are lookup keys, and the app must be able to trust their form.
 NAME = re.compile(r"[A-Za-z0-9@][A-Za-z0-9@._+:/-]{0,127}")
+# What a release's page may be. No user, port or `http`: the app goes by the exact host.
+PAGE = re.compile(r"https://[A-Za-z0-9.-]{1,253}(?:[/?#][A-Za-z0-9._~/%+#?=&:;,@!$()-]{0,255})?")
 
 
 class Refused(Exception):
@@ -111,6 +114,9 @@ def line_of(product, release):
     eol = date_of(release.get("eolFrom"))
     if eol:
         line["e"] = eol
+    page = (release.get("latest") or {}).get("link")
+    if isinstance(page, str) and PAGE.fullmatch(page):
+        line["n"] = page
     if release.get("isEol"):
         line["x"] = True
     else:
@@ -186,6 +192,8 @@ def check(data):
                 raise Refused(f"{product}: date {line['e']!r}")
             if "l" in line and not NUMBERS.fullmatch(line["l"]):
                 raise Refused(f"{product}: latest {line['l']!r}")
+            if "n" in line and not PAGE.fullmatch(line["n"]):
+                raise Refused(f"{product}: page {line['n']!r}")
 
 
 def numbers(version):

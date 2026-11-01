@@ -60,6 +60,18 @@ class Normalize(unittest.TestCase):
         rel = [{"name": "27", "isEol": False, "latest": {"name": "27.28.101"}}]
         self.assertNotIn("l", self.data(product("azul-zulu", rel))["products"]["azul-zulu"][0])
 
+    def test_a_release_line_has_the_page_of_its_latest_release(self):
+        page = "https://www.postgresql.org/docs/release/18.6/"
+        rel = [
+            {"name": "18", "isEol": False, "latest": {"name": "18.6", "link": page}},
+            {"name": "9", "isEol": True, "latest": {"name": "9.6.24", "link": page}},
+            {"name": "17", "isEol": False, "latest": {"name": "17.2"}},
+        ]
+        lines = self.data(product("postgresql", rel))["products"]["postgresql"]
+        self.assertEqual(lines[0], {"c": "18", "n": page, "l": "18.6"})
+        self.assertEqual(lines[1], {"c": "9", "n": page, "x": True})
+        self.assertNotIn("n", lines[2])
+
     def test_java_8_numbers(self):
         self.assertEqual(build.latest_of("8u504-b01"), "8.0.504")
         self.assertEqual(build.latest_of("27.0.1.0.2+1"), "27.0.1.0.2")
@@ -81,6 +93,25 @@ class Normalize(unittest.TestCase):
         rel = [{"name": 5}, {"name": "2.0", "eolFrom": True, "isEol": True}]
         self.assertEqual(self.data(product("mixed", rel))["products"]["mixed"], [{"c": "2.0", "x": True}])
 
+    def test_hostile_pages_do_not_reach_the_file(self):
+        for page in (
+            "http://example.com/",
+            "javascript:alert(1)",
+            "file:///etc/passwd",
+            "https://user@example.com/",
+            "https://example.com:8443/",
+            "https://example.com\\@evil.test/",
+            "https://example.com/a b",
+            "https://example.com/\n",
+            "https://example.com/<script>",
+            "https://example.com/" + "a" * 300,
+            "https://",
+            5,
+            None,
+        ):
+            rel = [{"name": "1.0", "isEol": False, "latest": {"link": page}}]
+            self.assertEqual(self.data(product("ok", rel))["products"]["ok"], [{"c": "1.0"}], page)
+
 
 class Check(unittest.TestCase):
     def good(self):
@@ -96,6 +127,7 @@ class Check(unittest.TestCase):
             lambda d: d["products"]["p0"][0].update(e="soon"),
             lambda d: d["products"]["p0"][0].update(l="1.x"),
             lambda d: d["products"]["p0"][0].update(c="one"),
+            lambda d: d["products"]["p0"][0].update(n="http://example.com/"),
             lambda d: d["names"].update({"x": "no-such-product"}),
             lambda d: d["names"].update({"bad name": "p0"}),
             lambda d: d["products"].clear(),
