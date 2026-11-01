@@ -280,6 +280,7 @@ CVE = re.compile(r"CVE-\d{4}-\d{4,}")
 ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}")
 VERSION = re.compile(r"\d[A-Za-z0-9._+-]{0,63}")
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+AT = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 
 
 class Refused(Exception):
@@ -514,9 +515,18 @@ def finish(merged, exploited, today, covered):
     }
 
 
+def stamp(new, old, now):
+    """When the data last changed. Kept while it stays as it was, so that a run that found nothing
+    new makes the same file and publishes nothing."""
+    same = old is not None and {k: v for k, v in old.items() if k != "at"} == new
+    new["at"] = old["at"] if same and "at" in old else now
+
+
 def check(data):
     if data.get("schema") != SCHEMA or not DATE.fullmatch(data.get("as_of", "")):
         raise Refused("schema or date")
+    if "at" in data and not AT.fullmatch(data["at"]):
+        raise Refused(f"time {data['at']!r}")
     if len(data["advisories"]) < FEWEST:
         raise Refused(f"only {len(data['advisories'])} advisories")
     for advisory in data["advisories"]:
@@ -542,7 +552,7 @@ def refuse_large_changes(old, new):
 def text_of(data):
     """One advisory a line, so that a day's change reads as a short diff in git."""
     compact = lambda value: json.dumps(value, separators=(",", ":"), ensure_ascii=False)
-    head = {k: data[k] for k in ("schema", "as_of", "sources", "products")}
+    head = {k: data[k] for k in ("schema", "as_of", "at", "sources", "products") if k in data}
     lines = ",\n".join(compact(a) for a in data["advisories"])
     return f'{compact(head)[:-1]},\n"advisories":[\n{lines}\n]}}\n'
 
@@ -574,9 +584,10 @@ def main():
         add_nvd(merged, cpes_of(products), now.year)
         exploited = {v["cveID"] for v in json.loads(fetch(KEV))["vulnerabilities"]}
         new = finish(merged, exploited, today, covered)
+        old = json.loads(OUT.read_text(encoding="utf-8")) if OUT.exists() else None
+        stamp(new, old, now.strftime("%Y-%m-%dT%H:%M:%SZ"))
         check(new)
-        if OUT.exists() and not args.force:
-            old = json.loads(OUT.read_text(encoding="utf-8"))
+        if old is not None and not args.force:
             if new["as_of"] < old["as_of"]:
                 raise Refused("older than the last file")
             refuse_large_changes(old, new)

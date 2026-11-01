@@ -140,10 +140,30 @@ class Check(unittest.TestCase):
     def test_good_data_passes(self):
         build.check(self.good())
 
+    def test_the_time_stays_while_the_data_does_and_moves_when_it_changes(self):
+        old = self.good()
+        old["at"] = "2026-10-31T00:00:00Z"
+        same = copy.deepcopy(old)
+        del same["at"]
+        build.stamp(same, old, "2026-10-31T06:00:00Z")
+        self.assertEqual(same, old, "a run that found nothing new makes the same file")
+        changed = copy.deepcopy(old)
+        del changed["at"]
+        changed["as_of"] = "2026-11-01"
+        build.stamp(changed, old, "2026-11-01T00:00:00Z")
+        self.assertEqual(changed["at"], "2026-11-01T00:00:00Z")
+        without = copy.deepcopy(old)
+        del without["at"], old["at"]
+        build.stamp(without, old, "2026-10-31T06:00:00Z")
+        self.assertEqual(without["at"], "2026-10-31T06:00:00Z", "a file from before it had one")
+        build.check(without)
+        self.assertIn('"at":"2026-10-31T06:00:00Z"', build.text_of(without).splitlines()[0])
+
     def test_bad_forms_are_refused(self):
         for change in (
             lambda d: d.update(schema=2),
             lambda d: d.update(as_of="yesterday"),
+            lambda d: d.update(at="this morning"),
             lambda d: d["products"]["p0"][0].update(e="soon"),
             lambda d: d["products"]["p0"][0].update(l="1.x"),
             lambda d: d["products"]["p0"][0].update(c="one"),

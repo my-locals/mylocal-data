@@ -81,6 +81,7 @@ MAX_ENDED_UNDONE = 10
 
 NUMBERS = re.compile(r"\d+(?:\.\d+)*")
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+AT = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 # What a name may be. They are lookup keys, and the app must be able to trust their form.
 NAME = re.compile(r"[A-Za-z0-9@][A-Za-z0-9@._+:/-]{0,127}")
 # What a release's page may be. No user, port or `http`: the app goes by the exact host.
@@ -177,10 +178,19 @@ def normalize(products, today):
     }
 
 
+def stamp(new, old, now):
+    """When the data last changed. Kept while it stays as it was, so that a run that found nothing
+    new makes the same file and publishes nothing."""
+    same = old is not None and {k: v for k, v in old.items() if k != "at"} == new
+    new["at"] = old["at"] if same and "at" in old else now
+
+
 def check(data):
     """That the file has the form the app accepts."""
     if data.get("schema") != SCHEMA or not DATE.fullmatch(data.get("as_of", "")):
         raise Refused("schema or date")
+    if "at" in data and not AT.fullmatch(data["at"]):
+        raise Refused(f"time {data['at']!r}")
     if len(data["products"]) < FEWEST_PRODUCTS:
         raise Refused(f"only {len(data['products'])} products")
     for table in (data["names"], data["scoped"]):
@@ -243,7 +253,7 @@ def refuse_large_changes(old, new):
 
 def text_of(data):
     """One product a line, so that a day's change reads as a short diff in git."""
-    head = {k: data[k] for k in ("schema", "as_of", "source")}
+    head = {k: data[k] for k in ("schema", "as_of", "at", "source") if k in data}
     compact = lambda value: json.dumps(value, separators=(",", ":"), ensure_ascii=False)
     def table(values):
         return ",\n".join(f"  {compact(k)}:{compact(v)}" for k, v in values.items())
@@ -267,12 +277,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--force", action="store_true", help="publish however much changed")
     args = parser.parse_args()
-    today = datetime.datetime.now(datetime.timezone.utc).date().isoformat()
+    now = datetime.datetime.now(datetime.timezone.utc)
+    today = now.date().isoformat()
     try:
         new = normalize(fetch(), today)
+        old = json.loads(OUT.read_text(encoding="utf-8")) if OUT.exists() else None
+        stamp(new, old, now.strftime("%Y-%m-%dT%H:%M:%SZ"))
         check(new)
-        if OUT.exists() and not args.force:
-            old = json.loads(OUT.read_text(encoding="utf-8"))
+        if old is not None and not args.force:
             if new["as_of"] < old["as_of"]:
                 raise Refused("older than the last file")
             refuse_large_changes(old, new)

@@ -182,11 +182,31 @@ class File(unittest.TestCase):
         with self.assertRaisesRegex(adv.Refused, "no longer covered: tomcat"):
             adv.refuse_large_changes(old, new)
 
+    def test_the_time_stays_while_the_data_does_and_moves_when_it_changes(self):
+        old = many()
+        old["at"] = "2026-10-31T00:00:00Z"
+        same = copy.deepcopy(old)
+        del same["at"]
+        adv.stamp(same, old, "2026-10-31T06:00:00Z")
+        self.assertEqual(same, old, "a run that found nothing new makes the same file")
+        changed = copy.deepcopy(old)
+        del changed["at"]
+        changed["as_of"] = "2026-11-01"
+        adv.stamp(changed, old, "2026-11-01T00:00:00Z")
+        self.assertEqual(changed["at"], "2026-11-01T00:00:00Z")
+        without = copy.deepcopy(old)
+        del without["at"], old["at"]
+        adv.stamp(without, old, "2026-10-31T06:00:00Z")
+        self.assertEqual(without["at"], "2026-10-31T06:00:00Z", "a file from before it had one")
+        adv.check(without)
+        self.assertIn('"at":"2026-10-31T06:00:00Z"', adv.text_of(without).splitlines()[0])
+
     def test_good_data_passes_and_bad_forms_do_not(self):
         adv.check(many())
         for change in (
             lambda d: d.update(schema=2),
             lambda d: d.update(as_of="soon"),
+            lambda d: d.update(at="this morning"),
             lambda d: d["advisories"][0].update(severity="<b>"),
             lambda d: d["advisories"][0].update(id="../evil"),
             lambda d: d["advisories"][0]["products"].update({"no-such": [{"f": "1"}]}),
