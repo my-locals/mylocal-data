@@ -31,8 +31,8 @@ class Normalize(unittest.TestCase):
         return build.normalize(list(products), "2026-10-31")
 
     def test_a_release_line(self):
-        d = self.data(product("redis"))
-        self.assertEqual(d["products"]["redis"], [{"c": "1.0", "e": "2030-01-01", "l": "1.0.5"}])
+        d = self.data(product("valkey"))
+        self.assertEqual(d["products"]["valkey"], [{"c": "1.0", "e": "2030-01-01", "l": "1.0.5"}])
         self.assertEqual(d["schema"], build.SCHEMA)
 
     def test_what_cannot_listen_stays_out(self):
@@ -60,37 +60,40 @@ class Normalize(unittest.TestCase):
         rel = [{"name": "27", "isEol": False, "latest": {"name": "27.28.101"}}]
         self.assertNotIn("l", self.data(product("azul-zulu", rel))["products"]["azul-zulu"][0])
 
-    def test_a_release_line_has_the_page_of_its_latest_release(self):
-        page = "https://www.postgresql.org/docs/release/18.6/"
+    def test_a_listed_product_has_its_main_page_whatever_its_links_say(self):
         rel = [
-            {"name": "18", "isEol": False, "latest": {"name": "18.6", "link": page}},
-            {"name": "9", "isEol": True, "latest": {"name": "9.6.24", "link": page}},
+            {"name": "18", "isEol": False, "latest": {"name": "18.6", "link": "https://www.postgresql.org/docs/release/18.6/"}},
+            {"name": "9", "isEol": True, "latest": {"name": "9.6.24", "link": "https://evil.test/"}},
             {"name": "17", "isEol": False, "latest": {"name": "17.2"}},
         ]
         lines = self.data(product("postgresql", rel))["products"]["postgresql"]
+        page = "https://www.postgresql.org/"
         self.assertEqual(lines[0], {"c": "18", "n": page, "l": "18.6"})
         self.assertEqual(lines[1], {"c": "9", "n": page, "x": True})
-        self.assertNotIn("n", lines[2])
+        self.assertEqual(lines[2]["n"], page)
 
-    def test_a_release_on_github_goes_by_its_repository(self):
-        def page_of(link):
-            rel = [{"name": "25", "isEol": False, "latest": {"link": link}}]
-            return self.data(product("x", rel))["products"]["x"][0]["n"]
-
+    def test_any_page_on_github_goes_by_its_repository(self):
         repository = "https://github.com/corretto/corretto-25"
+        for path in ("", "/releases/tag/25.0.5.0.10", "/releases/25.0.5.0.10", "/releases", "/blob/main/CHANGELOG.md#25", "/wiki/Notes"):
+            rel = [{"name": "25", "isEol": False, "latest": {"link": repository + path}}]
+            self.assertEqual(self.data(product("x", rel))["products"]["x"][0]["n"], repository, path)
+
+    def test_a_page_of_any_other_host_is_not_kept(self):
         for link in (
-            repository + "/releases/tag/25.0.5.0.10",
-            repository + "/releases/25.0.5.0.10",
-            repository + "/releases",
-        ):
-            self.assertEqual(page_of(link), repository)
-        # Other pages say what the repository's front page does not.
-        for link in (
-            "https://github.com/nodejs/node/blob/main/doc/changelogs/CHANGELOG_V26.md#26.13.0",
-            "https://github.com/gorilla#gorilla-toolkit",
             "https://example.com/a/b/releases/tag/1.0",
+            "https://example.com/github.com/a/b",
+            "https://github.com.evil.test/a/b",
+            "https://raw.githubusercontent.com/redis/redis/8.10/00-RELEASENOTES",
+            "https://github.com/gorilla#gorilla-toolkit",
         ):
-            self.assertEqual(page_of(link), link)
+            rel = [{"name": "1.0", "isEol": False, "latest": {"link": link}}]
+            self.assertNotIn("n", self.data(product("x", rel))["products"]["x"][0], link)
+
+    def test_the_main_pages_have_the_form_and_name_no_version(self):
+        self.assertEqual(list(build.PAGES), sorted(build.PAGES))
+        for product_name, page in build.PAGES.items():
+            self.assertRegex(page, build.PAGE, product_name)
+            self.assertNotRegex(page, r"\d+\.\d+|/v?\d+(?:/|$)|release", product_name)
 
     def test_java_8_numbers(self):
         self.assertEqual(build.latest_of("8u504-b01"), "8.0.504")

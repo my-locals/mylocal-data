@@ -79,6 +79,235 @@ MAX_END_DATES_LATER = 25
 MAX_LATEST_LOWERED = 10
 MAX_ENDED_UNDONE = 10
 
+# Main pages of products that do not release on GitHub, or whose links there lead elsewhere than
+# their own repository. Looked at by a person, and never about one version. A product in neither
+# has no page in the file, and the app opens its page on endoflife.date.
+PAGES = {
+    "akeneo-pim": "https://www.akeneo.com/akeneo-pim-community-edition/",
+    "alibaba-dragonwell": "https://dragonwell-jdk.io/",
+    "angularjs": "https://docs.angularjs.org/",
+    "ansible": "https://docs.ansible.com/",
+    "ant": "https://ant.apache.org/",
+    "apache-activemq": "https://activemq.apache.org/",
+    "apache-airflow": "https://airflow.apache.org/",
+    "apache-artemis": "https://artemis.apache.org/",
+    "apache-camel": "https://camel.apache.org/",
+    "apache-cassandra": "https://cassandra.apache.org/",
+    "apache-celeborn": "https://celeborn.apache.org/",
+    "apache-couchdb": "https://couchdb.apache.org/",
+    "apache-flink": "https://flink.apache.org/",
+    "apache-groovy": "https://groovy-lang.org/",
+    "apache-hadoop": "https://hadoop.apache.org/",
+    "apache-hop": "https://hop.apache.org/",
+    "apache-http-server": "https://httpd.apache.org/",
+    "apache-kafka": "https://kafka.apache.org/",
+    "apache-lucene": "https://lucene.apache.org/",
+    "apache-maven": "https://maven.apache.org/",
+    "apache-nifi": "https://nifi.apache.org/",
+    "apache-pulsar": "https://pulsar.apache.org/",
+    "apache-spark": "https://spark.apache.org/",
+    "apache-struts": "https://struts.apache.org/",
+    "apache-subversion": "https://subversion.apache.org/",
+    "arangodb": "https://arango.ai/",
+    "artifactory": "https://jfrog.com/artifactory/",
+    "authentik": "https://goauthentik.io/",
+    "azul-zulu": "https://www.azul.com/products/core/",
+    "azure-devops-server": "https://azure.microsoft.com/products/devops/server/",
+    "bamboo": "https://www.atlassian.com/software/bamboo",
+    "beats": "https://www.elastic.co/beats",
+    "bellsoft-liberica": "https://bell-sw.com/libericajdk/",
+    "bind-9": "https://www.isc.org/bind/",
+    "bitbucket": "https://www.atlassian.com/software/bitbucket",
+    "bitcoin-core": "https://bitcoincore.org/",
+    "blender": "https://www.blender.org/",
+    "boundary": "https://developer.hashicorp.com/boundary",
+    "cakephp": "https://cakephp.org/",
+    "centreon": "https://www.centreon.com/",
+    "ceph": "https://ceph.io/",
+    "cfengine": "https://cfengine.com/",
+    "checkmk": "https://checkmk.com/",
+    "chef-infra-client": "https://docs.chef.io/client/",
+    "chef-infra-server": "https://docs.chef.io/server/",
+    "chef-inspec": "https://docs.chef.io/inspec/",
+    "chef-supermarket": "https://docs.chef.io/supermarket/",
+    "chef-workstation": "https://docs.chef.io/workstation/",
+    "chrome": "https://www.google.com/chrome/",
+    "citrix-vad": "https://www.citrix.com/platform/citrix-app-and-desktop-virtualization/",
+    "ckeditor": "https://ckeditor.com/",
+    "cockroachdb": "https://www.cockroachlabs.com/",
+    "coldfusion": "https://www.adobe.com/products/coldfusion-family.html",
+    "commvault": "https://www.commvault.com/",
+    "composer": "https://getcomposer.org/",
+    "concrete-cms": "https://www.concretecms.org/",
+    "confluence": "https://www.atlassian.com/software/confluence",
+    "contao": "https://contao.org/",
+    "controlm": "https://www.bmc.com/it-solutions/control-m.html",
+    "cortex-xdr": "https://www.paloaltonetworks.com/cortex/cortex-xdr",
+    "couchbase-server": "https://www.couchbase.com/",
+    "craft-cms": "https://craftcms.com/",
+    "dce": "https://docs.daocloud.io/en/",
+    "dependency-track": "https://dependencytrack.org/",
+    "discourse": "https://www.discourse.org/",
+    "django": "https://www.djangoproject.com/",
+    "docker-engine": "https://docs.docker.com/engine/",
+    "dotnet": "https://dotnet.microsoft.com/",
+    "dotnetfx": "https://dotnet.microsoft.com/",
+    "drupal": "https://www.drupal.org/",
+    "eclipse-temurin": "https://adoptium.net/",
+    "elasticsearch": "https://www.elastic.co/elasticsearch",
+    "electron": "https://www.electronjs.org/",
+    "emberjs": "https://emberjs.com/",
+    "exim": "https://www.exim.org/",
+    "ffmpeg": "https://ffmpeg.org/",
+    "filemaker": "https://www.claris.com/filemaker/",
+    "firefox": "https://www.firefox.com/",
+    "foreman": "https://theforeman.org/",
+    "forgejo": "https://forgejo.org/",
+    "foundationdb": "https://www.foundationdb.org/",
+    "freedesktop-sdk": "https://freedesktop-sdk.gitlab.io/",
+    "gerrit": "https://www.gerritcodereview.com/",
+    "ghc": "https://www.haskell.org/ghc/",
+    "git": "https://git-scm.com/",
+    "gitlab": "https://about.gitlab.com/",
+    "gitlab-runner": "https://docs.gitlab.com/runner/",
+    "go": "https://go.dev/",
+    "goaccess": "https://goaccess.io/",
+    "godot": "https://godotengine.org/",
+    "gorilla": "https://github.com/gorilla",
+    "graalvm-ce": "https://www.graalvm.org/",
+    "graylog": "https://graylog.org/",
+    "gstreamer": "https://gstreamer.freedesktop.org/",
+    "guzzle": "https://github.com/guzzle/guzzle",
+    "haproxy": "https://www.haproxy.org/",
+    "hbase": "https://hbase.apache.org/",
+    "horizon": "https://www.omnissa.com/products/horizon-8/",
+    "ibm-db2": "https://www.ibm.com/products/db2",
+    "ibm-mq": "https://www.ibm.com/products/mq",
+    "ibm-semeru-runtime": "https://developer.ibm.com/languages/semeru-runtimes/",
+    "icinga": "https://icinga.com/",
+    "icinga-web": "https://github.com/Icinga/icingaweb2",
+    "idl": "https://www.nv5geospatialsoftware.com/Products/IDL",
+    "influxdb": "https://github.com/influxdata/influxdb",
+    "internet-explorer": "https://www.microsoft.com/download/internet-explorer",
+    "isc-dhcp": "https://www.isc.org/dhcp/",
+    "istio": "https://istio.io/",
+    "jfrog-xray": "https://jfrog.com/xray/",
+    "jira-service-management": "https://www.atlassian.com/software/jira/service-management",
+    "jira-software": "https://www.atlassian.com/software/jira",
+    "joomla": "https://www.joomla.org/",
+    "jquery": "https://jquery.com/",
+    "jquery-ui": "https://jqueryui.com/",
+    "keycloak": "https://www.keycloak.org/",
+    "kibana": "https://www.elastic.co/kibana",
+    "kirby": "https://getkirby.com/",
+    "laravel": "https://laravel.com/",
+    "libreoffice": "https://www.libreoffice.org/",
+    "liquibase-secure": "https://www.liquibase.com/liquibase-secure",
+    "log4j": "https://logging.apache.org/log4j/",
+    "logstash": "https://www.elastic.co/logstash",
+    "looker": "https://cloud.google.com/looker",
+    "lua": "https://www.lua.org/",
+    "magento": "https://github.com/magento/magento2",
+    "mariadb": "https://mariadb.org/",
+    "mattermost": "https://mattermost.com/",
+    "mediawiki": "https://www.mediawiki.org/wiki/MediaWiki",
+    "memcached": "https://www.memcached.org/",
+    "metallb": "https://metallb.io/",
+    "microsoft-build-of-openjdk": "https://learn.microsoft.com/java/openjdk/",
+    "mongodb": "https://www.mongodb.com/",
+    "moodle": "https://moodle.org/",
+    "msexchange": "https://www.microsoft.com/microsoft-365/exchange/email",
+    "mssqlserver": "https://www.microsoft.com/sql-server/",
+    "mulesoft-runtime": "https://www.mulesoft.com/",
+    "mysql": "https://www.mysql.com/",
+    "neo4j": "https://neo4j.com/",
+    "neos": "https://www.neos.io/",
+    "nextcloud": "https://nextcloud.com/",
+    "nexus": "https://www.sonatype.com/products/sonatype-nexus-repository",
+    "nginx": "https://nginx.org/",
+    "nix": "https://nixos.org/",
+    "nodejs": "https://nodejs.org/",
+    "notepad-plus-plus": "https://notepad-plus-plus.org/",
+    "nutanix-files": "https://www.nutanix.com/products/files",
+    "nutanix-prism": "https://www.nutanix.com/products/prism",
+    "office": "https://www.microsoft.com/microsoft-365",
+    "openjdk-builds-from-oracle": "https://jdk.java.net/",
+    "opensearch": "https://opensearch.org/",
+    "openssl": "https://openssl-library.org/",
+    "opnsense": "https://opnsense.org/",
+    "oracle-apex": "https://apex.oracle.com/",
+    "oracle-database": "https://www.oracle.com/database/",
+    "oracle-graalvm": "https://www.graalvm.org/",
+    "oracle-jdk": "https://www.oracle.com/java/",
+    "otobo": "https://otobo.io/",
+    "pangp": "https://www.paloaltonetworks.com/sase/globalprotect",
+    "perl": "https://www.perl.org/",
+    "pgadmin": "https://www.pgadmin.org/",
+    "php": "https://www.php.net/",
+    "phpbb": "https://www.phpbb.com/",
+    "phpmyadmin": "https://www.phpmyadmin.net/",
+    "plesk": "https://www.plesk.com/",
+    "plone": "https://plone.org/",
+    "postfix": "https://www.postfix.org/",
+    "postgresql": "https://www.postgresql.org/",
+    "proxmox-backup-server": "https://www.proxmox.com/en/proxmox-backup-server",
+    "proxmox-datacenter-manager": "https://www.proxmox.com/en/products/proxmox-datacenter-manager/overview",
+    "proxmox-mail-gateway": "https://www.proxmox.com/en/products/proxmox-mail-gateway/overview",
+    "puppet": "https://www.puppet.com/",
+    "python": "https://www.python.org/",
+    "qt": "https://www.qt.io/",
+    "quarkus-framework": "https://quarkus.io/",
+    "red-hat-ansible-automation-platform": "https://www.redhat.com/en/technologies/management/ansible",
+    "red-hat-openshift": "https://www.redhat.com/en/technologies/cloud-computing/openshift",
+    "redhat-build-of-openjdk": "https://developers.redhat.com/products/openjdk/overview",
+    "redhat-jboss-eap": "https://www.redhat.com/en/technologies/jboss-middleware/application-platform",
+    "redhat-satellite": "https://www.redhat.com/en/technologies/management/satellite",
+    "redis": "https://redis.io/",
+    "redmine": "https://www.redmine.org/",
+    "robo": "https://github.com/consolidation/robo",
+    "rtpengine": "https://github.com/sipwise/rtpengine",
+    "ruby": "https://www.ruby-lang.org/",
+    "rust": "https://www.rust-lang.org/",
+    "salt": "https://saltproject.io/",
+    "samba": "https://www.samba.org/",
+    "sapmachine": "https://sapmachine.io/",
+    "sharepoint": "https://www.microsoft.com/microsoft-365/sharepoint/collaboration",
+    "silverstripe": "https://github.com/silverstripe/silverstripe-framework",
+    "solr": "https://solr.apache.org/",
+    "sonarqube-community": "https://www.sonarsource.com/open-source-editions/sonarqube-community-edition/",
+    "sonarqube-server": "https://www.sonarsource.com/products/sonarqube/",
+    "sourcegraph": "https://sourcegraph.com/",
+    "splunk": "https://www.splunk.com/",
+    "sqlite": "https://www.sqlite.org/",
+    "squid": "https://www.squid-cache.org/",
+    "suse-manager": "https://www.suse.com/products/multi-linux-manager/",
+    "symfony": "https://symfony.com/",
+    "tomcat": "https://tomcat.apache.org/",
+    "twig": "https://twig.symfony.com/",
+    "typo3": "https://typo3.org/",
+    "umbraco": "https://umbraco.com/",
+    "unity": "https://unity.com/",
+    "unrealircd": "https://www.unrealircd.org/",
+    "vcenter": "https://www.vmware.com/products/cloud-infrastructure/vcenter",
+    "veeam-backup-and-replication": "https://www.veeam.com/products/veeam-data-platform/backup-recovery.html",
+    "veeam-backup-for-microsoft-365": "https://www.veeam.com/products/saas/backup-microsoft-office-365.html",
+    "veeam-one": "https://www.veeam.com/products/veeam-data-platform/monitoring-analytics.html",
+    "vinyl-cache": "https://vinyl-cache.org/",
+    "virtualbox": "https://www.virtualbox.org/",
+    "visual-studio": "https://visualstudio.microsoft.com/",
+    "vmware-cloud-foundation": "https://www.vmware.com/products/cloud-infrastructure/vmware-cloud-foundation",
+    "vmware-harbor-registry": "https://techdocs.broadcom.com/us/en/vmware-tanzu/platform/harbor-registry/services/harbor/index.html",
+    "vmware-srm": "https://www.vmware.com/products/cloud-infrastructure/advanced-services/live-recovery",
+    "wagtail": "https://wagtail.org/",
+    "windows-powershell": "https://learn.microsoft.com/powershell/",
+    "wireshark": "https://www.wireshark.org/",
+    "wordpress": "https://wordpress.org/",
+    "youtrack": "https://www.jetbrains.com/youtrack/",
+    "zabbix": "https://www.zabbix.com/",
+    "zerto": "https://www.zerto.com/",
+    "zookeeper": "https://zookeeper.apache.org/",
+}
+
 NUMBERS = re.compile(r"\d+(?:\.\d+)*")
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 AT = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
@@ -86,8 +315,8 @@ AT = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 NAME = re.compile(r"[A-Za-z0-9@][A-Za-z0-9@._+:/-]{0,127}")
 # What a release's page may be. No user, port or `http`: the app goes by the exact host.
 PAGE = re.compile(r"https://[A-Za-z0-9.-]{1,253}(?:[/?#][A-Za-z0-9._~/%+#?=&:;,@!$()-]{0,255})?")
-# A release on GitHub goes by its repository, whose front page stays and shows the latest.
-GITHUB_RELEASE = re.compile(r"(https://github\.com/[^/?#]+/[^/?#]+)/releases(?:[/?#].*)?")
+# Any page of a repository on GitHub goes by its front page, which stays and shows the latest.
+GITHUB_REPOSITORY = re.compile(r"(https://github\.com/[^/?#]+/[^/?#]+)(?:[/?#].*)?")
 
 
 class Refused(Exception):
@@ -108,6 +337,18 @@ def date_of(value):
     return value if isinstance(value, str) and DATE.fullmatch(value) else None
 
 
+def page_of(product, release):
+    """A main page that stays as versions come. The source's link says where a repository is,
+    and is not kept: its other pages are about one version, and of any host."""
+    if product in PAGES:
+        return PAGES[product]
+    link = (release.get("latest") or {}).get("link")
+    if isinstance(link, str) and PAGE.fullmatch(link):
+        github = GITHUB_REPOSITORY.fullmatch(link)
+        return github[1] if github else None
+    return None
+
+
 def line_of(product, release):
     """One release line, or None when its name is not the numbers a version starts with."""
     name = release.get("name")
@@ -117,10 +358,9 @@ def line_of(product, release):
     eol = date_of(release.get("eolFrom"))
     if eol:
         line["e"] = eol
-    page = (release.get("latest") or {}).get("link")
-    if isinstance(page, str) and PAGE.fullmatch(page):
-        github = GITHUB_RELEASE.fullmatch(page)
-        line["n"] = github[1] if github else page
+    page = page_of(product, release)
+    if page:
+        line["n"] = page
     if release.get("isEol"):
         line["x"] = True
     else:
