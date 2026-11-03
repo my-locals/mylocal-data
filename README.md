@@ -3,9 +3,9 @@
 [MyLocal](https://mylocal.myiam.io)이 서버 버전의 지원 상태를 보여 줄 때 쓰는 자료입니다. 앱은 이 파일 전체를 받아 Mac 안에서만 비교하므로, 어떤 프로그램을 쓰는지는 여기로 전해지지 않습니다.
 
 - **자료:** [`data/support.json`](data/support.json). [endoflife.date](https://endoflife.date)(MIT, [`NOTICE`](NOTICE))에서 만든 제품별 릴리스 라인, 지원 종료일, 최신 패치입니다. 제품 하나가 한 줄이라 `git log -p`로 무엇이 바뀌었는지 읽을 수 있습니다.
-- **보안 공지:** [`data/advisories.json`](data/advisories.json). 제품별로 알려진 공지와 설명 전문입니다. 공지 하나가 한 줄입니다.
+- **보안 공지:** [`data/advisories.json`](data/advisories.json). 제품별로 알려진 공지와 설명 전문입니다. 공지 하나가 한 줄입니다. 출처별 라이선스는 [`NOTICE`](NOTICE)에 있고, 릴리스에도 함께 올립니다.
   - `covered` 제품: OSV의 Bitnami, Maven(GitHub Advisory Database), Go 자료와 npm의 vite, Next.js. 공지가 없으면 "알려진 공지 없음"으로 표시합니다. 이 자료에 없는 공지는 NVD에서 더합니다.
-  - `partial` 제품: NVD와 OSV의 나머지 자료(npm, PyPI, RubyGems, Packagist, Go 모듈)로 보는 제품. 공식 목록과 비교해 빠진 것이 있거나 비교하지 않았으므로, 공지가 없어도 "없음"이라고 하지 않습니다. NVD는 CPE가 없는 CVE가 많습니다(2026년 56%).
+  - `partial` 제품: NVD와 OSV의 나머지 자료(npm, PyPI, RubyGems, Packagist(Drupal 자료 포함), Go 모듈)로 보는 제품. 공식 목록과 비교해 빠진 것이 있거나 비교하지 않았으므로, 공지가 없어도 "없음"이라고 하지 않습니다. NVD는 CPE가 없는 CVE가 많습니다(2026년 56%).
   - 실제 악용 여부는 CISA KEV에서 가져옵니다.
 - **받는 곳:** `releases/latest/download/`의 `support.json`, `advisories.json.gz`와 각각의 `.minisig`. 공지는 압축 파일 그대로 서명하므로, 앱은 압축을 풀기 전에 서명부터 확인합니다.
 - **서명:** minisign 형식입니다. 공개 키는 [`public-key.txt`](public-key.txt)이고 앱에 들어 있습니다. 비밀 키는 Actions 비밀값 `SIGNING_KEY`에만 있고, 앱 업데이트 키와 다릅니다.

@@ -39,6 +39,8 @@ MyLocal Mac 앱이 서버 버전의 지원 여부와 알려진 보안 공지를 
 
 **`n`의 값.** 버전과 상관없는 메인 페이지입니다. `build.py`의 `PAGES` 표에 있으면 그 주소이고, 없으면 출처 링크가 가리키는 GitHub 저장소의 첫 페이지입니다. 출처의 다른 주소는 쓰지 않습니다. 둘 다 없는 제품은 `n`이 없고 앱이 `endoflife.date/<제품>`을 엽니다. 표에는 직접 열어 확인한 주소만 넣고, 새 호스트는 앱의 `catalog/page-hosts.txt`에도 더해야 열립니다.
 
+**출처 고지.** 출처를 더하거나 빼면 `NOTICE`, `finish()`의 `sources` 문자열, MyLocal 저장소의 `scripts/licenses/advisories/NOTICE`와 `notices.py`, 앱의 `notices_hint`, 웹사이트 FAQ를 함께 고칩니다. 라이선스가 다른 자료(동일 조건, 비상업 등)는 넣기 전에 검토합니다.
+
 **앱과의 약속.** 앱이 이 파일들을 파싱하며, `SCHEMA`와 정규식이 앱이 받아들이는 형식을 나타냅니다. 형식을 바꾸면 MyLocal 저장소도 함께 바꿔야 합니다.
 
 **`advisories.py`의 커버리지.** `BITNAMI`, `MAVEN`, `GO`, `NPM` 표에 있는 제품은 `covered`로, 일치하는 공지가 없으면 "알려진 공지 없음"으로 표시할 수 있습니다. 그래서 표에 넣기 전에 제품의 공식 공지 목록과 대조합니다. `*_ALSO`, `PYPI`, `RUBYGEMS`, `PACKAGIST` 표와 NVD는 `partial`로, 일치하는 공지가 없어도 아무것도 말해 주지 않습니다. covered 표의 제품도 공지가 하나도 없으면 `finish()`가 partial로 내리고, 그러면 `refuse_large_changes`가 실행을 멈춥니다.

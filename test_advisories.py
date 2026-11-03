@@ -56,6 +56,29 @@ class Ranges(unittest.TestCase):
 
 
 class Merging(unittest.TestCase):
+    def test_drupals_records_are_named_for_it(self):
+        def osv_with(*records):
+            merged = adv.Merged()
+            shown = []
+            for r, a in records:
+                shown.append({**r, "affected": [{**a, "package": {"name": "drupal/core"}}]})
+            real = adv.osv_records
+            adv.osv_records = lambda name: shown
+            try:
+                adv.add_osv(merged, "Packagist", {"drupal/core": "drupal"}, "ghsa")
+            finally:
+                adv.osv_records = real
+            return merged.items
+
+        items = osv_with(
+            record(rid="DRUPAL-CORE-2026-013", aliases=()),
+            record(rid="GHSA-aaaa-bbbb-cccc"),
+            record(rid="DRUPAL-CORE-2026-001"),
+        )
+        self.assertEqual(items["DRUPAL-CORE-2026-013"]["sources"], {"drupal"})
+        # One advisory from both keeps both.
+        self.assertEqual(items["CVE-2026-1234"]["sources"], {"ghsa", "drupal"})
+
     def test_sources_of_one_cve_join(self):
         merged = adv.Merged()
         r, a = record()

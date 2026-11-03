@@ -418,7 +418,9 @@ def add_osv(merged, name, table, source):
         for affected in record.get("affected") or []:
             product = product_in(table, (affected.get("package") or {}).get("name"))
             if product:
-                add_one(merged, record, affected, product, source)
+                # Packagist's set also has Drupal's own, under another license than GitHub's (NOTICE).
+                origin = "drupal" if str(record.get("id")).startswith("DRUPAL-") else source
+                add_one(merged, record, affected, product, origin)
 
 
 def add_one(merged, record, affected, product, source):
@@ -509,7 +511,7 @@ def finish(merged, exploited, today, covered):
     return {
         "schema": SCHEMA,
         "as_of": today,
-        "sources": "OSV (Bitnami vulndb, GitHub Advisory Database, Go, PyPI), NVD, CISA KEV",
+        "sources": "OSV (Bitnami vulndb, GitHub Advisory Database, Go, PyPI, Drupal), NVD, CISA KEV",
         "products": {p: ("covered" if p in covered and p in products else "partial") for p in sorted(products | covered)},
         "advisories": advisories,
     }

@@ -92,8 +92,8 @@ jobs:
             echo "Nothing new to publish."
           else
             gh release create "data-$as_of-$GITHUB_RUN_NUMBER" out/support.json out/support.json.minisig \
-              out/advisories.json.gz out/advisories.json.gz.minisig \
-              --latest --title "Data as of $as_of" --notes "Support data from endoflife.date as of $as_of."
+              out/advisories.json.gz out/advisories.json.gz.minisig NOTICE \
+              --latest --title "Data as of $as_of" --notes "Data as of $as_of, from endoflife.date and the advisory sources listed in NOTICE."
           fi
           # The history is in git; a month of releases is enough to go back to.
           gh release list --limit 200 --json tagName --jq '.[120:] | .[].tagName' |
