@@ -14,7 +14,7 @@ MyLocal Mac 앱이 서버 버전의 지원 여부와 알려진 보안 공지를 
 ./test_build.py && ./test_advisories.py          # 전체 테스트, 네트워크 없음
 ./test_build.py Normalize.test_a_release_line    # 테스트 하나 (unittest의 Class.method)
 ./build.py                                       # 받아서 검사하고 data/support.json을 덮어씀
-./advisories.py                                  # data/advisories.json에 같은 작업: 약 1분, 메모리 6GB
+./advisories.py                                  # data/advisories.json에 같은 작업: 3~20분 이상, 메모리 6GB
 ```
 
 린터, 빌드 단계, 의존성 파일은 없습니다. `build.py`, `advisories.py`와 테스트는 표준 라이브러리만 씁니다. `sign.py`는 `cryptography`가, 워크플로의 서명 확인은 `minisign`이 필요하며 CI는 둘 다 apt로 설치합니다.
@@ -53,7 +53,7 @@ MyLocal Mac 앱이 서버 버전의 지원 여부와 알려진 보안 공지를 
 
 ## 게시 (`.github/workflows/publish.yml`)
 
-- 지원 자료가 실패하면 실행 전체가 멈춥니다. 공지 쪽 실패는 `continue-on-error`라서 지원 자료는 게시되고 지난 공지가 유지되며, 알리기 위해 실행이 마지막에 실패로 끝납니다. 공지 단계는 CI에서 3~10분 걸리므로 단계에 따로 20분 한도를 두어, 느려도 작업 전체(30분 한도)가 취소되지 않고 같은 실패로 처리됩니다.
+- 지원 자료가 실패하면 실행 전체가 멈춥니다. 공지 쪽 실패는 `continue-on-error`라서 지원 자료는 게시되고 지난 공지가 유지되며, 알리기 위해 실행이 마지막에 실패로 끝납니다. 공지 단계는 CI에서 3분에서 20분 넘게까지 걸리므로 단계에 따로 20분 한도를 두어, 느려도 작업 전체(30분 한도)가 취소되지 않고 같은 실패로 처리됩니다. 시간은 거의 전부 NVD 연도별 피드(약 270MB)를 받는 데 쓰이고 OSV, endoflife.date, KEV는 몇 초입니다. NVD는 IP 단위로 속도를 제한하는 것으로 보여, 여러 개를 동시에 받아도 빨라지지 않았습니다(2026-11 측정).
 - 앱이 압축을 풀기 전에 서명을 확인하므로 `advisories.json.gz`는 압축된 상태로 서명합니다. `support.json`은 그대로 서명합니다.
 - 각 단계는 필요한 것만 받습니다. 서명 키는 서명 단계에만, 쓰기 토큰은 게시 단계에만 들어갑니다. 외부 액션은 커밋으로 고정한 `actions/checkout`뿐이고, 다른 도구는 apt로 설치합니다.
 - 실행이 바뀐 자료를 `Data as of <date>`로 `main`에 직접 커밋하므로 `main`은 하루에도 여러 번 움직입니다. 푸시 전에 pull합니다.
