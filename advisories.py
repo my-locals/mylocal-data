@@ -26,6 +26,7 @@ import json
 import pathlib
 import re
 import sys
+import time
 import urllib.request
 import zipfile
 
@@ -577,9 +578,13 @@ def text_of(data):
 
 
 def fetch(url):
+    """The body at `url`. How long it took goes to the log, as a run can take many times as long
+    as it did, and the time between two of these lines is what was spent on the first's data."""
+    started = time.monotonic()
     request = urllib.request.Request(url, headers={"User-Agent": "mylocal-data"})
     with urllib.request.urlopen(request, timeout=180) as response:
         body = response.read(FETCH_LIMIT + 1)
+    print(f"{time.monotonic() - started:6.1f}s {len(body) / (1 << 20):7.1f} MB  {url}", file=sys.stderr, flush=True)
     if len(body) > FETCH_LIMIT:
         raise Refused(f"{url} is too large")
     return body
