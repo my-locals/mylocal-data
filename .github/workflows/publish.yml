@@ -19,7 +19,7 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 30
     permissions:
       contents: write
     steps:
@@ -43,12 +43,14 @@ jobs:
           mkdir out
           cp data/support.json out/support.json
 
-      # A source that fails, or a change too large to trust, leaves the last advisories in
-      # place: the support data still goes out, the app sees their date, and the run ends
-      # failed at the end so that someone hears of it.
+      # A source that fails or is too slow, or a change too large to trust, leaves the last
+      # advisories in place: the support data still goes out, the app sees their date, and the
+      # run ends failed at the end so that someone hears of it. The step has its own time limit,
+      # as the job's would stop the support data too.
       - name: Build and check advisories
         id: advisories
         continue-on-error: true
+        timeout-minutes: 20
         env:
           FORCE: ${{ inputs.force }}
         run: |
