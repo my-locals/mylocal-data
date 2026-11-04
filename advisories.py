@@ -517,11 +517,28 @@ def finish(merged, exploited, today, covered):
     }
 
 
+# The app reads advisories older than 14 days as old (`FRESH_DAYS` in mylocal-core), so a date
+# kept while nothing changes still moves on this often.
+RENEW_DAYS = 7
+
+
 def stamp(new, old, now):
-    """When the data last changed. Kept while it stays as it was, so that a run that found nothing
-    new makes the same file and publishes nothing."""
-    same = old is not None and {k: v for k, v in old.items() if k != "at"} == new
-    new["at"] = old["at"] if same and "at" in old else now
+    """When the data last changed, and the date it is as of. Both are kept while the data stays as
+    it was, even on a later day, so that a run that found nothing new makes the same file and
+    publishes nothing; the date moves on once it is RENEW_DAYS old, and the time stays."""
+    unchanged = (
+        old is not None
+        and "at" in old
+        and {k: v for k, v in old.items() if k not in ("at", "as_of")}
+        == {k: v for k, v in new.items() if k != "as_of"}
+    )
+    if not unchanged:
+        new["at"] = now
+        return
+    new["at"] = old["at"]
+    age = datetime.date.fromisoformat(new["as_of"]) - datetime.date.fromisoformat(old["as_of"])
+    if age.days < RENEW_DAYS:
+        new["as_of"] = old["as_of"]
 
 
 def check(data):

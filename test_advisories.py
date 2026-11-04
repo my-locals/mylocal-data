@@ -212,11 +212,26 @@ class File(unittest.TestCase):
         del same["at"]
         adv.stamp(same, old, "2026-10-31T06:00:00Z")
         self.assertEqual(same, old, "a run that found nothing new makes the same file")
+        later = copy.deepcopy(old)
+        del later["at"]
+        later["as_of"] = "2026-11-06"
+        adv.stamp(later, old, "2026-11-06T06:00:00Z")
+        self.assertEqual(later, old, "nor on a later day")
+        renewed = copy.deepcopy(old)
+        del renewed["at"]
+        renewed["as_of"] = "2026-11-07"
+        adv.stamp(renewed, old, "2026-11-07T06:00:00Z")
+        self.assertEqual(
+            (renewed["as_of"], renewed["at"]),
+            ("2026-11-07", "2026-10-31T00:00:00Z"),
+            "the date moves on before the app reads it as old, and the time stays",
+        )
         changed = copy.deepcopy(old)
         del changed["at"]
         changed["as_of"] = "2026-11-01"
+        changed["products"].popitem()
         adv.stamp(changed, old, "2026-11-01T00:00:00Z")
-        self.assertEqual(changed["at"], "2026-11-01T00:00:00Z")
+        self.assertEqual((changed["as_of"], changed["at"]), ("2026-11-01", "2026-11-01T00:00:00Z"))
         without = copy.deepcopy(old)
         del without["at"], old["at"]
         adv.stamp(without, old, "2026-10-31T06:00:00Z")
