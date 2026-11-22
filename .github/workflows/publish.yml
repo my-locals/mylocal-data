@@ -23,8 +23,11 @@ jobs:
     permissions:
       contents: write
     steps:
+      # The tip of main, not the commit the run started from: a re-run would otherwise
+      # build on data an earlier attempt has already replaced, and could not push.
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
+          ref: main
           persist-credentials: false
 
       - name: Tools from the distribution
